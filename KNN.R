@@ -140,9 +140,17 @@ plot(timeplot$V1, timeplot$V5)
 #We need the known classifications of the testing set for this part of the analysis. Like those for the 
 # training set, the classes of the testing set should be in a .txt file, in a single column.
 # Here they are saved in a file called "testclasses.txt. 
-
+library(caret)
 #Load the classes from the "testclasses.txt" file.
-testclasses = scan("testclasses.txt")
-testclasses <- as.data.frame(testclasses)
+testclasses = read.csv("testclasses.csv", header = F)
+testclasses <- testclasses[,1]
 
+#We use the predictions from the KNN conducted earlier, but as a numeric to match the testclasses object class
+predclasses <-as.numeric(clas1)
+
+#using the caret library, we compare predicted with actual classes and 
+#construct a confusion matrix to calculate accuracy etc.
+conf <- confusionMatrix(predclasses,testclasses)
+
+conf #look at results
 
