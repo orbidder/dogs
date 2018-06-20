@@ -1,4 +1,5 @@
 ####################################################################################################
+# 1 - Generate Predictions #
 #This script runs K nearest neighbour analysis on files "train1.txt" and "test1.txt"
 #Data files should be in .txt format, with each accelerometer axis in its own column, no spaces in between.
 #Axis order (e.g. X,Y,Z etc..) is unimportant provided it is consistent between training and testing files
@@ -36,6 +37,7 @@ fileprobs = paste("probstrial", kk, ".csv", sep="")
 write.csv (prob$prob, fileprobs)
 
 ##############################################################################################
+# 2 - Filter by Prob Threshold #
 #The next part of the script runs a filter over the results, accepting the classification made
 # by the KNN, provided the 'prob' value meets a certain threshold value (which can be defined).
 #This can increase the precision of the KNN method, accepting classifications only when we are confident
@@ -136,6 +138,7 @@ for (i in 1:length(thres)){
 write.csv(sum_results, "results_summary.csv")
 
 #############################################################################################
+# 3 - 3D Scatterplots #
 #In this section we plot the accl data on an XYZ scatterplot in order to show the clustering
 # and how classifications were made by the KNN
 
@@ -171,6 +174,7 @@ legend(s3d$xyz.convert(2,-0.2,1.8), col= c("blue", "green", "red"),
        bg = "white")
 
 ###################################################################################
+# 4 - Timeplots #
 #In this section we will make an XY plot showing time on the x-axis and the class on the y-axis#
 #This can be used in interpretation of the behavioural data#
 
@@ -215,6 +219,7 @@ plot(timeplot$V1, timeplot$V7)
 #This is on the to-do, and I'll add an issue to the GitHub
 
 ##############################################################################################
+# 5 - Confusion Matrix #
 #In this section we will compare the results of the KNN to the known classifications of the testing set
 # This will allow us to calculate accuracy, precision and recall for the KNN on this data set
 # This can be used to run a validation experiment, similar to the one in the PLoS One paper by Bidder et al.
