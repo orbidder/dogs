@@ -43,12 +43,21 @@ write.csv (prob$prob, fileprobs)
 # class. So classifications with a low majority of k-nearest data in the winning class are discarded.
 
 #First we define our minimum majority threshold value
-thres <- 0.7
+thres <- c(0.5,0.6,0.7,0.8,0.9)
 
 #We load back in the results and prob values and combine them into a matrix with 2 columns
 results = read.csv("resultstrial21.csv", header = TRUE)
 probs = read.csv("probstrial21.csv", header = TRUE)
 resprob = cbind(results$x, probs$x)
+
+#Now load in actual test classes to calculate TP, TN, FP, FN rates
+testclass <- read.csv("testclasses.csv", header = F, stringsAsFactors = F)
+
+#bind both actual and predicted classes
+resprob <- cbind(testclass,resprob)
+
+#give meaningful names
+colnames(resprob) <- c("test_class","pred_class","Prob")
 
 #Now "resprob" has two columns, V1 contains the classifications, V2 the prob values. Now let's apply
 # the threshold to the prob values, making a new column containing 1 if it meets the threshold
@@ -57,17 +66,74 @@ resprob = cbind(results$x, probs$x)
 #First let's make resprob a data frame
 resprob = as.data.frame(resprob)
 
-#Then we apply the threshold, filling in a thirdcolumn "V3"
-resprob$V3 = resprob$V2 >= thres
+#Then we apply the threshold, filling in a thirdcolumn, X<threshold>
+thres.results <- data.frame("X5"=seq(1:nrow(resprob)),"X6"=seq(1:nrow(resprob)),"X7"=seq(1:nrow(resprob)),"X8"=seq(1:nrow(resprob)),"X9"=seq(1:nrow(resprob)))
+for (i in 1:length(thres.results)){
+  thres.results[i] <- resprob$Prob >= thres[i]
+}
 
-#or you can use the following; res$V3 <- ifelse(res$V2 >= .7, 1, 0)
-#this uses the ifelse command, which works like this: ifelse(condition, do_if_true, do_if_false)
+resprob <- cbind(resprob,thres.results)
 
-
+result <- data.frame()
+for(prob in 4:8){
+for(x in 1:length(resprob$Prob)){
+  ifelse(resprob[x,prob] == "TRUE" && resprob$test_class[x] == resprob$pred_class[x], result[x,prob-3] <- "TP", 
+         ifelse(resprob[x,prob] == "TRUE" && resprob$test_class[x] != resprob$pred_class[x], result[x,prob-3] <- "FP", 
+                ifelse(resprob[x,prob] == "FALSE" && resprob$test_class[x] == resprob$pred_class[x], result[x,prob-3] <- "FN", 
+                       ifelse(resprob[x,prob] == "FALSE" && resprob$test_class[x] != resprob$pred_class[x], result[x,prob-3] <- "TN", "None"))))
+}
+}
+colnames(result) <- c("result_5","result_6","result_7","result_8","result_9")
 #Save resprob to a file to look at later
+resprob <- cbind(resprob,result)
 write.csv(resprob, "resprob.csv")
 
+length(resprob$result_5[resprob$result_5 == "TP"])
+length(resprob$result_5)
 
+column <- resprob[10]
+
+#make summary table for this animal
+#establish functions to calculate accuracy, precision, recall, as established in the Bidder et al., PLOS One paper
+acc <- function(column){
+  TP <- length(column[column == "TP"])
+  TN <- length(column[column == "TN"])
+  FP <- length(column[column == "FP"])
+  FN <- length(column[column == "FN"])
+  
+  accuracy <- (TP+TN)/(TP+TN+FP+FN)
+  return(accuracy)
+}
+prec <- function(column){
+  TP <- length(column[column == "TP"])
+  TN <- length(column[column == "TN"])
+  FP <- length(column[column == "FP"])
+  FN <- length(column[column == "FN"])
+  
+  precision <- (TP)/(TP+FP)
+  return(precision)
+}
+rec <- function(column){
+  TP <- length(column[column == "TP"])
+  TN <- length(column[column == "TN"])
+  FP <- length(column[column == "FP"])
+  FN <- length(column[column == "FN"])
+  
+  recll <- (TP)/(TP+FN)
+  return(recll)
+}
+
+#populate summary table with metrics
+sum_results <- data.frame(thres, "Accuracy"=thres, "Precision"=thres, "Recall"=thres)
+
+for (i in 1:length(thres)){
+  sum_results$Accuracy[i] <- acc(resprob[i+8])
+  sum_results$Precision[i] <- prec(resprob[i+8])
+  sum_results$Recall[i] <- rec(resprob[i+8])
+}
+
+#write to file
+write.csv(sum_results, "results_summary.csv")
 
 #############################################################################################
 #In this section we plot the accl data on an XYZ scatterplot in order to show the clustering
