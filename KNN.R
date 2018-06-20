@@ -177,14 +177,19 @@ legend(s3d$xyz.convert(2,-0.2,1.8), col= c("blue", "green", "red"),
 #Include the time data  for the test file, which are contained in a file called "times.csv"
 #the time stamp data are in a single column, cut from the original file prior to conducting the KNN
 times <- read.csv("times.csv", header = FALSE)
-#options(digits.secs = 3)
-#times <- strptime(times,"%M:%OSn")
-#times
+
+options(digits.secs = 3)
+help("strptime")
+#format("0:00:56.020", format="%H:%M:%OS3")
+#format(times$V1, format="%H:%M:%OS3")
+times <- as.POSIXct(format(times$V1, format="%H:%M:%OS3"))
+times
 
 #create a new data frame with times, accl data from 'forplot', classes from 'forplot' and a column
 # of whether or not that classification met the threshold. Using cbind.data.frame ensures it is treated
 # as a data frame and data from times are pasted into the new frame as they appear in 'times'
-timeplot <- cbind.data.frame(times$V1, forplot$V1, forplot$V2, forplot$V3, forplot$V4, forplot$V6)
+timeplot <- cbind.data.frame(times$V1, forplot$V1, forplot$V2, forplot$V3, forplot$pred_class, forplot$Prob, forplot$test_class)
+
 #Rename the columns for ease of use later
 names(timeplot)[1] <- "V1"
 names(timeplot)[2] <- "V2"
@@ -192,13 +197,22 @@ names(timeplot)[3] <- "V3"
 names(timeplot)[4] <- "V4"
 names(timeplot)[5] <- "V5"
 names(timeplot)[6] <- "V6"
+names(timeplot)[7] <- "V7"
+
 
 #Filter rows that didn't meet the threshold from 'timeplot'
-timeplot <- timeplot[!timeplot$V6 == 0, ]
+timeplot <- timeplot[!timeplot$V6 <= 0.7, ]
 #plot as XY plot with time on x-axis and the class on the y-axis
 plot(timeplot$V1, timeplot$V5)
 #You can now get a timeline with all the behavioural classes and the sequence in which they occur, or use
 # timeplot data frame to calculate the durations for which behaviours occur etc.
+
+#maybe you want to compare to annotated classes to see if it matches up
+plot(timeplot$V1, timeplot$V7)
+
+#comparing the two, it's clear we need to apply some kind of smoothing to the predicted classes to detect
+#when scent marks are actual scent marks, or to make them more definitive
+#This is on the to-do, and I'll add an issue to the GitHub
 
 ##############################################################################################
 #In this section we will compare the results of the KNN to the known classifications of the testing set
