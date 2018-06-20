@@ -141,15 +141,17 @@ write.csv(sum_results, "results_summary.csv")
 
 #Make a new data frame for plotting, with test1 data and the resprob data too.
 test1 <- as.data.frame(test1)
-forplot <- cbind(test1$V1, test1$V2, test1$V3, resprob$V1, resprob$V2, resprob$V3)
+forplot <- cbind(test1, resprob)
 
 #Delete any row of data for which the prob value didn't meet the minimum threshold
 forplot <- as.data.frame(forplot)
-jtso <- forplot[!forplot$V6 == 0, ]
+
+#use the .7 threshold for now
+jtso <- forplot[!forplot$Prob <= 0.7, ]
 
 #Plot all the data that was classed in an XYZ scatterplot, colour the data according to class
 #split the data frame according to the classes in column V4. Mylist 1 is class 1, mylist 2 is class 2 etc..
-mylist <- split(jtso, jtso$V4)
+mylist <- split(jtso, jtso$pred_class)
 mylist[[1]]
 
 #now lets plot the data coloured according to class
