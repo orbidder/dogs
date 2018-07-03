@@ -1,4 +1,6 @@
 # dogs
+NOTICE: If this is the first time you're visiting this repository, take a look at KNN.R for a worked example of K-nearest neighbour on accelerometer data.
+
 All files for classification of canid accelerometer data to identify scent marks
 
 UPDATE: 7/3/2018
