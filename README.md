@@ -2,7 +2,8 @@
 All files for classification of canid accelerometer data to identify scent marks
 
 UPDATE: 7/3/2018
-Owen
+Owen B:
+
 I've been working through the first of the Hopland dog's data, Nate. I've started putting a workflow that is summarized briefly here.
 
 Validation using camera observation period
