@@ -62,30 +62,34 @@ def label(accl_data):
 
 label(twentyHz.iloc[0,])
 
-%timeit test = twentyHz.apply(label,axis=1)
-#test = twentyHz.apply(label,axis=1)
-#test.to_csv('annotated_accl.csv')
+#%timeit test = twentyHz.apply(label,axis=1)
+import time
+t0 = time.perf_counter()
+test = twentyHz.apply(label,axis=1)
+test.to_csv('annotated_accl.csv')
+t1 = time.perf_counter()
+total = t1-t0
 
 
+###The code below works much much faster to label twentyHz rows with class infro from annot
+# I was able to do it using help from some folks on the internet!
 
-###The code below needs work, but it's my current attempt to speed this process up (with help from folks on the internet)
-#Ignore for now#
-# Create mock dfs
 import pandas as pd
 import numpy as np
 import time
 # Create mock dfs
-twentyHz = pd.DataFrame(np.random.randn(20, 3).round(), columns=list('abc'))
-annot = pd.DataFrame({'start': [0, 7, 12, 15], 'end': [3, 9, 15, 17], 'class': ['A', 'B', 'C', 'D']})
+#twentyHz = pd.DataFrame(np.random.randn(20, 3).round(), columns=list('abc'))
+#annot = pd.DataFrame({'start': [0, 4, 7, 12, 15], 'end': [3, 6, 9, 15, 17], 'class': ['A', 'B', 'B', 'C', 'D']})
 
 t0 = time.perf_counter()
-bins = np.unique(annot[['start', 'end']].values.flatten()) # get time range bins
-categorized = pd.cut(twentyHz.index, bins, right=False) # categorize into bins based on time, right=False means start is inclusive, end is exclusive
+bins = np.unique(annot[['start', 'end']].values.flatten())  # get time range bins
+annot['period'] = '['+annot['start'].astype(str) + ', ' + annot['end'].astype(str) + ')'
+categorized = pd.cut(twentyHz.index, bins, right=False).astype(str) # categorize into bins based on time, right=False means start is inclusive, end is exclusive
 categorized = pd.Series(categorized).to_frame('labels') # make it a dataframe to get ready for merge below
-twentyHz['class'] = categorized.merge(annot, left_on='labels', right_on='['+annot['start'].astype(str) + ', ' + annot['end'].astype(str) + ')', how='left')['class'].fillna('no class') # merge with processed annot frame to get the correct labels
+twentyHz['class'] = categorized.merge(annot, left_on='labels', right_on='['+annot['start'].round(decimals=3).astype(str) + ', ' + annot['end'].round(decimals=3).astype(str) + ')', how='left')['class'].fillna('no class').values # merge with processed annot frame to get the correct labels
 
 t1 = time.perf_counter()
 total = t1-t0
+twentyHz.to_csv('annotated_accl.csv')
 
 print('Done Ow')
-pd.__version__
