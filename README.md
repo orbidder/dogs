@@ -3,7 +3,7 @@ NOTICE: If this is the first time you're visiting this repository, take a look a
 
 All files for classification of canid accelerometer data to identify scent marks
 
-UPDATE: 7/3/2018
+UPDATE: 7/12/2018
 Owen B:
 
 I've been working through the first of the Hopland dog's data, Nate. I've started putting a workflow that is summarized briefly here.
@@ -22,3 +22,5 @@ Then just run through the video and make annotations, output annotations as a ta
 5.Load the accelerometer data and the annotation record, combine the two using the label_accl.py script. This will output a accl file with an extra column that contains the class of behaviour being undertaken by the animal at that time
 
 6.Use the KNN_Nate.py script to actually train and test the KNN classifier to the annotated data. Doing this process with Nate's data has highlighted the need to run another filter over Nate's KNN output, because this dog doesn't raise its legs very high, so stand, scent marks and lying are often confused. I suggest a duration filter that says 'if the activity (scent mark/stand/lying) last under 6 seconds, it's a scent mark, over 6 s is a stand, and anything 15-1000s is probably lying down or resting. This isn't ideal but Nate didn't behave like the Norwegian Dogs in the validation study.
+
+7. Use the smooth_knn.py script to smooth the KNN predictions. This script takes our 25 Hz accl data and smooths it to 1 Hz, taking the modal class for each 25-row group that constitutes a second of accl data. This smoothing reduces noise in the KNN predictions and makes it easier to sync with GPS data later. There is also a function in this script to check each class' accuracy and ensure the smoothed data matches the actual classes as recorded by video (after it too has been smoothed).
