@@ -27,4 +27,6 @@ Then just run through the video and make annotations, output annotations as a ta
 
 8. Using the link_gps.py script, merge the annotations of the accelerometer data (a product of the KNN) to the Latitude and Longitude in the GPS data. Once the GPS data has behavioural classes, identify the points where dogs are making left and right scent marks. Create a plot that shows all the points (as a heatmap depending on the time spend at each location) and then the scent mark locations. To illustrate, the map is shown below...
 
+<iframe src="https://github.com/orbidder/dogs/blob/master/my_map.html" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
 
+https://github.com/orbidder/dogs/blob/master/my_map.html
