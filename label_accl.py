@@ -22,6 +22,14 @@ stop = start + 5
 twentyHz[(twentyHz.index > start) & (twentyHz.index < stop)].plot(figsize=(10, 5))
 
 # from annotation, we can see the video ends at 2813.644
+
+#create csv for the unobserved period
+nate_unobs = twentyHz[(twentyHz.index > 2813.64)]
+nate_unobs.iloc[::20, :].plot() #quickly plot every 20th row to get a summary of file
+#the accl obviously comes off the data before the end of the file
+#I will pass all data through KNN and then cut the end according to the timestamp
+nate_unobs.to_csv('nate_unobserved.csv')
+
 # cut file to duration of video
 twentyHz = twentyHz[(twentyHz.index > start) & (twentyHz.index < 2813.64)]
 # set start time to 0
