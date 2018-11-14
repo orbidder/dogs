@@ -1,37 +1,26 @@
 # dogs
 NOTICE: If this is the first time you're visiting this repository, take a look at KNN.R for a worked example of K-nearest neighbour on accelerometer data.
 
-All files for classification of canid accelerometer data to identify scent marks
+Directions for use of Python scripts
+To encourage uptake of the methods described in this study, we have provided all of the scripts necessary to implement detection of scent-marking detection in accelerometer data, and link those detected events to GPS data collected concurrently. Some devices may produce data files that follow a different format, but the code here should be general enough to implement for most devices with some minor adjustment to the code. Here we present a brief outline of the workflow when using these scripts.
 
-UPDATE: 7/12/2018
-Owen B:
+1.	When using the AX3 accelerometer, use OMGui (https://github.com/digitalinteraction/openmovement/wiki/AX3-GUI) to convert the .cwa files in to a resampled CSV file. We down-sampled data to 25 Hz to improve computation speed.
 
-I've been working through the first of the Hopland dog's data, Nate. I've started putting a workflow that is summarized briefly here.
+2.	Do a quick summary plot using the crop_file.py. We used this script to crop the file, as the device continued to record after it was removed from the dogs, producing large files with superfluous data. Use the ‘chunksize’ argument to specify how many rows should be taken from the start of the file.
 
-Validation using camera observation period
+3.	Before we can use the KNN to predict scent-marking events, we need to use an initial period of observation to train the model. In our study, we obtained a training set by observing the dog prior to release. Thus, the accelerometer file must be split in to training and testing periods. The next few steps detail how one may prepare and train the KNN.
 
-1. Use OMGui to convert the .cwa files in to a resampled .csv . I found it was useful to downsample tha acclerometer data to 25Hz, as these files are more easily handled.
+4.	We must synchronize the timestamp of the accelerometer data with the video that details to behavioural observations of the dog. At the beginning of the observation period, we performed conspicuous calibration tilts (the device was rotated 90 degrees for 5 second, and this was repeated 3 times). With this in mind, use subsample.py to plot 10-minute summaries of the data. The function will run through the first 3 days of the file (after that the tag was off the animal and so it's just excess data), showing a 10 minute window in each plot to help you find the calibration tilts mentioned previously. This function needs there to be a folder called 'explore', which will be filled with plots for you to run through sequentially (using Windows’ Photo app for instance). In future, we will implement a more elegant interactive plot for Users to use in Python, but this is currently in development. Once the tilts are identified and their time in the accelerometer file noted, you can trim the start of the file to ca. 5 seconds before the tilts, to make them easy to spot and sync to the video in ELAN.
 
-2. Do a quick summary plot using the crop_spyder.py, if the file is too large, you can cut out just the first n number of rows to get just the time during which we filmed the dogs
+5.	Load the trimmed data in to ELAN, along with the video. Sync the two using the procedure detailed in the video tutorial kindly produced by Cassim Ladha (https://www.youtube.com/watch?v=zofLvUU0Gus). Then run through the video and make annotations. Following this, output annotations as a tab delimited text file to load back in to Python.
 
-3. Use subsample.py to plot 10 minute summaries of the data. The function will run through the first 3 days of the file (after that the tag was off the animal and so it's just excess data), showing 10 minutes at a time to help you find the calibration tilts we placed at the start of the accl and video in order to sync the two. This function needs there to be a folder called 'explore', which will be filled with plots for you to run through sequentially. I couldn't think of a more elegant way to do this, but if someone finds a plotting function that's scrollable, we can edit it in. Once you know where the tilts are, I suggest you trim the start of the file to ~5 seconds before the tilts to make it easy to sync in ELAN
+6.	Using the label_accl.py script, load the accelerometer data and the annotation record, combine the two to produce one annotated accelerometer dataset. This will output an accelerometer file with an extra column that contains the class of behaviour being undertaken by the animal at that time.
 
-4. Load the trimmed data in to ELAN, along with the video. Sync the two using the procedure detailed in this video: https://www.youtube.com/watch?v=zofLvUU0Gus
-Then just run through the video and make annotations, output annotations as a tab delimited text file
+7.	Use the KNN_sm.py script to actually train and test the KNN classifier to the annotated data. Functions to obtain performance metrics (e.g. Accuracy) are included, along with a means to construct confusion matrices to evaluate the KNN’s performance.
 
-5. Load the accelerometer data and the annotation record, combine the two using the label_accl.py script. This will output a accl file with an extra column that contains the class of behaviour being undertaken by the animal at that time
+8.	Use the smooth_knn.py script to smooth the KNN predictions to 1 Hz so that they can be linked to GPS locations recorded at that time. This script takes the 25 Hz accelerometer data and smooths it to 1 Hz, by taking the modal class for each 25-row group that constitutes a second of accelerometer data. There is also a function in this script to check each class' accuracy and ensure the smoothed data matches the actual classes as recorded by video (after those annotations too has been smoothed).
 
-6. Use the KNN_Nate.py script to actually train and test the KNN classifier to the annotated data. Doing this process with Nate's data has highlighted the need to run another filter over Nate's KNN output, because this dog doesn't raise its legs very high, so stand, scent marks and lying are often confused. I suggest a duration filter that says 'if the activity (scent mark/stand/lying) last under 6 seconds, it's a scent mark, over 6 s is a stand, and anything 15-1000s is probably lying down or resting. This isn't ideal but Nate didn't behave like the Norwegian Dogs in the validation study.
+9.	Using the link_gps.py script, merge the predicted classes of the accelerometer data (a product of the KNN) to the Latitude and Longitude values in the GPS data. Once the GPS data has behavioural classes, identify the points where dogs are making left and right scent marks. These points then can be written to file for use in GIS software or R for further analysis.
 
-7. Use the smooth_knn.py script to smooth the KNN predictions. This script takes our 25 Hz accl data and smooths it to 1 Hz, taking the modal class for each 25-row group that constitutes a second of accl data. This smoothing reduces noise in the KNN predictions and makes it easier to sync with GPS data later. There is also a function in this script to check each class' accuracy and ensure the smoothed data matches the actual classes as recorded by video (after it too has been smoothed).
+10.	These steps can then be repeated using data from the unobserved period (obtained during deployment on free living animals for instance) to obtain a record of scent-marking locations. The necessary code segments are presented in the scripts above too.
 
-8. Using the link_gps.py script, merge the annotations of the accelerometer data (a product of the KNN) to the Latitude and Longitude in the GPS data. Once the GPS data has behavioural classes, identify the points where dogs are making left and right scent marks. Create a plot that shows all the points (as a heatmap depending on the time spend at each location) and then the scent mark locations. To illustrate, the map is shown below...
-
-
-
-<div class="container">
-	
-	<iframe src="https://github.com/orbidder/dogs/blob/master/my_map.html" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
-
-</div>
-https://github.com/orbidder/dogs/blob/master/my_map.html
