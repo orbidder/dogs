@@ -1,4 +1,4 @@
-#dogs
+# dogs
 This repository contains the scripts neccessary to detect behaviours (namely scent marking events) in accelerometer data and annotate
 GPS location data to describe when and where that behaviour occurs.
 
