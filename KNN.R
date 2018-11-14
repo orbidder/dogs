@@ -9,31 +9,31 @@ library(stats)
 library(class)
 
 #load up train and testing files
-train1 = scan("train1.txt") 
-test1 = scan("test1.txt")
+train1 <- scan("train1.txt") 
+test1 <- scan("test1.txt")
 
 #convert inputs into matrix
-train1 = matrix(train1, byrow = T, ncol=3)
-test1 = matrix(test1, byrow = T, ncol=3)
+train1 <- matrix(train1, byrow = T, ncol=3)
+test1 <- matrix(test1, byrow = T, ncol=3)
 
 #load the classes in the training data
-cl1a = scan("classes1.txt")
+cl1a <- scan("classes1.txt")
 
 #set k 
-kk = 21
+kk <- 21
 
 #run knn
-kn1 = knn(train1, test1, cl1a, k=kk, prob=TRUE)
+kn1 <- knn(train1, test1, cl1a, k=kk, prob=TRUE)
 
-prob = attributes(.Last.value)
-clas1=factor(kn1)
+prob <- attributes(.Last.value)
+clas1 <- factor(kn1)
 
 #write results, this is the classification of the testing set in a sinlge column
-filename = paste("resultstrial", kk, ".csv", sep="")
+filename <- paste("resultstrial", kk, ".csv", sep="")
 write.csv(clas1, filename)
 
 #write probs to file, this is the proportion of k nearest datapoints that contributed to the winning class
-fileprobs = paste("probstrial", kk, ".csv", sep="")
+fileprobs <- paste("probstrial", kk, ".csv", sep="")
 write.csv (prob$prob, fileprobs)
 
 ##############################################################################################
@@ -48,9 +48,9 @@ write.csv (prob$prob, fileprobs)
 thres <- c(0.5,0.6,0.7,0.8,0.9)
 
 #We load back in the results and prob values and combine them into a matrix with 2 columns
-results = read.csv("resultstrial21.csv", header = TRUE)
-probs = read.csv("probstrial21.csv", header = TRUE)
-resprob = cbind(results$x, probs$x)
+results <- read.csv("resultstrial21.csv", header = TRUE)
+probs <- read.csv("probstrial21.csv", header = TRUE)
+resprob <- cbind(results$x, probs$x)
 
 #Now load in actual test classes to calculate TP, TN, FP, FN rates
 testclass <- read.csv("testclasses.csv", header = F, stringsAsFactors = F)
@@ -66,7 +66,7 @@ colnames(resprob) <- c("test_class","pred_class","Prob")
 # and 0 if it doesn't.
 
 #First let's make resprob a data frame
-resprob = as.data.frame(resprob)
+resprob <- as.data.frame(resprob)
 
 #Then we apply the threshold, filling in a thirdcolumn, X<threshold>
 thres.results <- data.frame("X5"=seq(1:nrow(resprob)),"X6"=seq(1:nrow(resprob)),"X7"=seq(1:nrow(resprob)),"X8"=seq(1:nrow(resprob)),"X9"=seq(1:nrow(resprob)))
@@ -78,12 +78,12 @@ resprob <- cbind(resprob,thres.results)
 
 result <- data.frame()
 for(prob in 4:8){
-for(x in 1:length(resprob$Prob)){
-  ifelse(resprob[x,prob] == "TRUE" && resprob$test_class[x] == resprob$pred_class[x], result[x,prob-3] <- "TP", 
-         ifelse(resprob[x,prob] == "TRUE" && resprob$test_class[x] != resprob$pred_class[x], result[x,prob-3] <- "FP", 
-                ifelse(resprob[x,prob] == "FALSE" && resprob$test_class[x] == resprob$pred_class[x], result[x,prob-3] <- "FN", 
-                       ifelse(resprob[x,prob] == "FALSE" && resprob$test_class[x] != resprob$pred_class[x], result[x,prob-3] <- "TN", "None"))))
-}
+  for(x in 1:length(resprob$Prob)){
+    ifelse(resprob[x,prob] == "TRUE" && resprob$test_class[x] == resprob$pred_class[x], result[x,prob-3] <- "TP", 
+           ifelse(resprob[x,prob] == "TRUE" && resprob$test_class[x] != resprob$pred_class[x], result[x,prob-3] <- "FP", 
+                  ifelse(resprob[x,prob] == "FALSE" && resprob$test_class[x] == resprob$pred_class[x], result[x,prob-3] <- "FN", 
+                         ifelse(resprob[x,prob] == "FALSE" && resprob$test_class[x] != resprob$pred_class[x], result[x,prob-3] <- "TN", "None"))))
+  }
 }
 colnames(result) <- c("result_5","result_6","result_7","result_8","result_9")
 #Save resprob to a file to look at later
@@ -93,7 +93,7 @@ write.csv(resprob, "resprob.csv")
 length(resprob$result_5[resprob$result_5 == "TP"])
 length(resprob$result_5)
 
-column <- resprob[10]
+#column <- resprob[10]
 
 #make summary table for this animal
 #establish functions to calculate accuracy, precision, recall, as established in the Bidder et al., PLOS One paper
@@ -158,7 +158,7 @@ mylist <- split(jtso, jtso$pred_class)
 mylist[[1]]
 
 #now lets plot the data coloured according to class
-install.packages("scatterplot3d")
+#install.packages("scatterplot3d")
 library(scatterplot3d)
 
 
@@ -170,7 +170,7 @@ s3d <- scatterplot3d(file1$V1, file1$V2, file1$V3, main= "3D Scatterplot of all 
 s3d$points3d(file2$V1, file2$V2, file2$V3, col = rgb(0,1,0,))
 s3d$points3d(file3$V1, file3$V2, file3$V3, col = rgb(1,0,0,))
 legend(s3d$xyz.convert(2,-0.2,1.8), col= c("blue", "green", "red"),
-       legend = c("Class 1", "Class 2", "Class 3"), lwd = 2,
+       legend = c("Right SM", "Left SM", "Squat Faeces"), lwd = 2,
        bg = "white")
 
 ###################################################################################
@@ -180,19 +180,23 @@ legend(s3d$xyz.convert(2,-0.2,1.8), col= c("blue", "green", "red"),
 
 #Include the time data  for the test file, which are contained in a file called "times.csv"
 #the time stamp data are in a single column, cut from the original file prior to conducting the KNN
+library(lubridate)
 times <- read.csv("times.csv", header = FALSE)
 
 options(digits.secs = 3)
 help("strptime")
+help("parse_date_time")
 #format("0:00:56.020", format="%H:%M:%OS3")
+
 #format(times$V1, format="%H:%M:%OS3")
-times <- as.POSIXct(format(times$V1, format="%H:%M:%OS3"))
-times
+times <- format(times$V1, format="%H:%M:%OS3")
+times <- parse_date_time(times, orders = "HMS")
+
 
 #create a new data frame with times, accl data from 'forplot', classes from 'forplot' and a column
 # of whether or not that classification met the threshold. Using cbind.data.frame ensures it is treated
 # as a data frame and data from times are pasted into the new frame as they appear in 'times'
-timeplot <- cbind.data.frame(times$V1, forplot$V1, forplot$V2, forplot$V3, forplot$pred_class, forplot$Prob, forplot$test_class)
+timeplot <- cbind.data.frame(times, forplot$V1, forplot$V2, forplot$V3, forplot$pred_class, forplot$Prob, forplot$test_class)
 
 #Rename the columns for ease of use later
 names(timeplot)[1] <- "V1"
